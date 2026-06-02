@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Дашборд: Производство брикетов</title>
+    <!-- Подключение Font Awesome для иконок -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        /* Базовые стили */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        /* Стили панели поиска */
+        .search-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        input[type="text"] {
+            width: calc(100% - 22px);
+            max-width: 400px; /* Ограничение ширины на больших экранах */
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            outline: none;
+            transition: box-shadow 0.3s ease;
+        }
+        input[type="text"]:focus {
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+            border-color: #007bff;
+        }
+        button {
+            padding: 9px 20px;
+            border-radius: 20px;
+            border: none;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white !important;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Стили таблицы */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            vertical-align: top;
+        }
+        thead tr {
+            background-color: #007bff;
+            color: white;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f9fafc;
+        }
+        tbody tr:hover {
+            background-color: #e9ecef;
+        }
+        th.sortable:hover i.fa-sort {
+            display: inline-block;
+        }
+        th.sorted.asc i.fa-sort-up,
+        th.sorted.desc i.fa-sort-down {
+            display: inline-block;
+            color: white;
+        }
+        th.sorted.asc i.fa-sort-down,
+        th.sorted.desc i.fa-sort-up {
+            display: none;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            table, thead, tbody, th, td, tr {
+                display: block;
+                width: 100%;
+            }
+            thead {
+                position: absolute;
+                top: -9999px;
+                left: -9999px;
+            }
+            tr { border: 1px solid #ddd; margin-bottom: 10px; }
+            td {
+                border: none;
+                border-bottom: 1px solid #eee;
+                position: relative;
+                padding-left: 50%; /* Освобождаем место для заголовка */
+            }
+            td:before {
+                content: attr(data-label);
+                position: absolute;
+                left: 15px;
+                top: 12px;
+                font-weight: bold;
+                width: 45%;
+                white-space: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Производство топливных брикетов в России</h1>
+
+<div class="search-container">
+    <input type="text" id="searchInput" placeholder="Поиск по названию предприятия или региону...">
+    <button onclick="filterTable()"><i class="fas fa-search"></i> Найти</button>
+</div>
+
+<table id="data-table">
+    <thead>
+        <tr>
+            <th class="sortable" data-column="name">Название предприятия <i class="fas fa-sort"></i></th>
+            <th class="sortable" data-column="region">Регион базирования <i class="fas fa-sort"></i></th>
+            <th class="sortable" data-column="volume">Объем производства (тонн/год) <i class="fas fa-sort"></i></th>
+            <th class="sortable" data-column="supplies">Основные направления поставок <i class="fas fa-sort"></i></th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- Данные из вашей таблицы -->
+        <tr><td data-label="Название предприятия">ООО «Лестех»</td><td data-label="Регион базирования">Ленинградская область</td><td data-label="Объем производства (тонн/год)">15 000</td><td data-label="Основные направления поставок">Экспорт (Европа), опт по РФ, розница в СЗФО</td></tr>
+        <tr><td data-label="Название предприятия">Группа компаний «Светлые поля» («ЛПК»)</td><td data-label="Регион базирования">Новгородская область</td><td data-label="Объем производства (тонн/год)">25 000</td><td data-label="Основные направления поставок">Экспорт (Япония, Ю. Корея), федеральные сети РФ</td></tr>
+        <tr><td data-label="Название предприятия">ООО «ЭкоЭнергоТех»</td><td data-label="Регион базирования">Тверская область</td><td data-label="Объем производства (тонн/год)">8 000</td><td data-label="Основные направления поставок">Центральная Россия, локальная розница</td></tr>
+        <tr><td data-label="Название предприятия">ООО «Русские брикеты»</td><td data-label="Регион базирования">Кировская область</td><td data-label="Объем производства (тонн/год)">12 000</td><td data-label="Основные направления поставок">Экспорт (Европа), Уральский федеральный округ</td></tr>
+        <tr><td data-label="Название предприятия">ООО «БиоТопливо-Инвест»</td><td data-label="Регион базирования">Калужская область</td><td data-label="Объем производства (тонн/год)">5 000</td><td data-label="Основные направления поставок">Московский регион, центральный федеральный округ</td></tr>
+        <tr><td data-label="Название предприятия">АО «Устьянский лесопромышленный комплекс»</td><td data-label="Регион базирования">Архангельская область</td><td data-label="Объем производства (тонн/год)">18 000</td><td data-label="Основные направления поставок">Экспорт (Скандинавия), СЗФО</td></tr>
+        <tr><td data-label="Название предприятия">ООО «Брикетный завод «Тайга»</td><td data-label="Регион базирования">Иркутская область</td><td data-label="Объем производства (тонн/год)">10 000</td><td data-label="Основные направления поставок">Сибирский федеральный округ, экспорт (Китай, Монголия)</td></tr>
+        <tr><td data-label="Название предприятия">ООО «Эко-Лес»</td><td data-label="Регион базирования">Вологодская область</td><td data-label="Объем производства (тонн/год)">7 000</td><td data-label="Основные направления поставок">СЗФО, ЦФО</td></tr>
+        <tr><td data-label="Название предприятия">ГК «Титан»</td><td data-label="Регион базирования">Архангельская область</td><td data-label="Объем производства (тонн/год)">20 000</td><td data-label="Основные направления поставок">Крупный экспорт (Европа, Азия), федеральные поставки</td></tr>
+        <tr><td data-label="Название предприятия">ООО «Вологодские биотопливные технологии»</td><td data-label="Регион базирования">Вологодская область</td><td data-label="Объем производства (тонн/год)">6 500</td><td data-label="Основные направления поставок">Северо-Западный федеральный округ, Санкт-Петербург</td></tr>
+        <tr><td data-label="Название предприятия">ООО «Костромской брикет»</td><td data-label="Регион базирования">Костромская область</td><td data-label="Объем производства (тонн/год)">4 500</td><td data-label="Основные направления поставок">Центральная Россия</td></tr>
+        <tr><td data-label="Название предприятия">ООО «Сыктывкарский ЛПК»</td><td data-label="Регион базирования">Республика Коми</td><td data-label="Объем производства (тонн/год)">9 000</td><td data-label="Основные направления поставок">Экспорт, Северо-Западный федеральный округ</td></tr>
+        <tr><td data-label="Название предприятия">ООО «Биотопливная компания «Европеллет»</td><td data-label="Регион базирования">Свердловская область</td><td data-label="Объем производства (тонн/год)">8 500</td><td data-label="Основные направления поставок">Уральский федеральный округ, экспорт через порты</td></tr>
+        <tr><td data-label="Название предприятия">ООО «Тверской гранульно-брикетный завод»</td><td data-label="Регион базирования">Тверская область</td><td data-label="Объем производства (тонн/год)">3 500</td><td data-label="Основные направления поставок">Тверская и Московская области</td></tr>
+        <tr><td data-label="Название предприятия">ООО «Лесресурс»</td><td data-label="Регион базирования">Пермский край</td><td data-label="Объем производства (тонн/год)">5 500</td><td data-label="Основные направления поставок">Уральский федеральный округ, Приволжский федеральный округ</td></tr>
+        <tr><td data-label="Название предприятия">ООО «Невский экологический ресурс»</td><td data-label="Регион базирования">Ленинградская область</td><td data-label="Объем производства (тонн/год)">11 000</td><td data-label="Основные направления поставок">Экспорт (Прибалтика), Северо-Западный федеральный округ</td></tr>
+    </tbody>
+</table>
+
+<script>
+    // --- Логика сортировки ---
+    const headers = document.querySelectorAll('th.sortable');
+    let currentSortColumn = null;
+    let sortDirection = 'asc'; // asc / desc
+
+    headers.forEach(header => {
+        header.addEventListener('click', () => {
+            const column = header.getAttribute('data-column');
+
+            if (currentSortColumn === column) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                // Убираем класс sorted у предыдущего столбца
+                if (currentSortColumn) {
+                    document.querySelector(`[data-column="${currentSortColumn}"]`).classList.remove('sorted', 'asc', 'desc');
+                }
+                currentSortColumn = column;
+                sortDirection = 'asc';
+            }
+
+            header.classList.toggle('sorted', true);
+            header.classList.toggle('asc', sortDirection === 'asc');
+            header.classList.toggle('desc', sortDirection === 'desc');
+
+            sortTable(column, sortDirection);
+        });
+    });
+
+    function sortTable(column, direction) {
+        const table = document.getElementById('data-table');
+        const tbody = table.querySelector('tbody');
+        const rows = Array.from(tbody.querySelectorAll('tr'));
+
+        rows.sort((rowA, rowB) => {
+            const cellA = rowA.cells[getCellIndex(column)].innerText.trim();
+            const cellB = rowB.cells[getCellIndex(column)].innerText.trim();
+
+            // Если сортируем по объему производства, сравниваем как числа
+            if (column === 'volume') {
+                const numA = parseInt(cellA.replace(/\D/g,'')) || 0;
+                const numB = parseInt(cellB.replace(/\D/g,'')) || 0;
+                return direction === 'asc' ? numA - numB : numB - numA;
+            }
+
+            // Для строкового сравнения
+            return direction === 'asc'
+                ? cellA.localeCompare(cellB)
+                : cellB.localeCompare(cellA);
+        });
+
+        // Удаляем старые строки и добавляем отсортированные
+        while (tbody.firstChild) {
+            tbody.removeChild(tbody.firstChild);
+        }
+        rows.forEach(row => tbody.appendChild(row));
+    }
+
+    function getCellIndex(columnName) {
+        switch(columnName) {
+            case 'name': return 0;
+            case 'region': return 1;
+            case 'volume': return 2;
+            case 'supplies': return 3;
+            default: return 0;
+        }
+    }
+
+    // --- Логика фильтрации (поиска) ---
+    function filterTable() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const rows = document.querySelectorAll('#data-table tbody tr');
+
+        rows.forEach(row => {
+            const cells = row.getElementsByTagName('td');
+            let matchFound = false;
+            for (let i = 0; i < cells.length; i++) {
+                if (cells[i].textContent.toLowerCase().includes(input)) {
+                    matchFound = true;
+                    break;
+                }
+            }
+            row.style.display = matchFound ? '' : 'none';
+        });
+    }
+</script>
+
+</body>
+</html>
